@@ -11,7 +11,7 @@ import { FormFieldComponent } from "../../components/form-field/form-field.compo
 import { PasswordConfirmationValidator } from "../../../../shared/validators/passwordConfirmationValidator";
 import { AuthLayoutComponent } from "../../../../core/layouts/auth-layout/auth-layout.component";
 import { AuthService } from "../../auth.service";
-import { AuthRole, RegisterUserRequest } from "../../auth-domain";
+import { AuthRole, RegisterUserRequest } from "../../auth.domain";
 
 @Component({
   selector: "app-signup",
@@ -68,7 +68,9 @@ export class SignupComponent implements OnInit {
     };
 
     console.log("Form submitted:", request);
-    this.authService.registerNewUser(request);
+    this.authService
+      .registerNewUser(request)
+      .subscribe((data) => console.log(data));
     this.isSubmitting = false;
     this.signupForm.reset();
   }
