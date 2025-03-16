@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
- * Request DTO for {@link com.aymanetech.event.user.domain.entity.Permission}
+ * Request DTO for {@link Permission}
  */
 public record PermissionRequestDto(
         @NotBlank @UniqueField(fieldName = "name", entityClass = Permission.class, message = "Permission name already exists")

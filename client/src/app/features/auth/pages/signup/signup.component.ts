@@ -10,6 +10,8 @@ import { CommonModule } from "@angular/common";
 import { FormFieldComponent } from "../../components/form-field/form-field.component";
 import { PasswordConfirmationValidator } from "../../../../shared/validators/passwordConfirmationValidator";
 import { AuthLayoutComponent } from "../../../../core/layouts/auth-layout/auth-layout.component";
+import { AuthService } from "../../auth.service";
+import { AuthRole, RegisterUserRequest } from "../../auth.domain";
 
 @Component({
   selector: "app-signup",
@@ -24,6 +26,8 @@ import { AuthLayoutComponent } from "../../../../core/layouts/auth-layout/auth-l
 })
 export class SignupComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+
   signupForm!: FormGroup;
   isSubmitting = false;
 
@@ -55,19 +59,20 @@ export class SignupComponent implements OnInit {
 
     this.isSubmitting = true;
 
-    setTimeout(() => {
-      const formValue = {
-        firstName: this.signupForm.get("firstName")?.value,
-        lastName: this.signupForm.get("lastName")?.value,
-        email: this.signupForm.get("email")?.value,
-        password: this.signupForm.get("passwords.password")?.value,
-        terms: this.signupForm.get("terms")?.value,
-      };
+    const request: RegisterUserRequest = {
+      firstName: this.signupForm.get("firstName")?.value,
+      lastName: this.signupForm.get("lastName")?.value,
+      email: this.signupForm.get("email")?.value,
+      password: this.signupForm.get("passwords.password")?.value,
+      role: AuthRole.ORGANIZER,
+    };
 
-      console.log("Form submitted:", formValue);
-      this.isSubmitting = false;
-      this.signupForm.reset();
-    }, 1500);
+    console.log("Form submitted:", request);
+    this.authService
+      .registerNewUser(request)
+      .subscribe((data) => console.log(data));
+    this.isSubmitting = false;
+    this.signupForm.reset();
   }
 
   get firstNameControl(): FormControl {
