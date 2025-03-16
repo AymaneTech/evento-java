@@ -11,6 +11,13 @@ export const routes: Routes = [
             (m) => m.SignupComponent,
           ),
       },
+      {
+        path: "login",
+        loadComponent: () =>
+          import("./features/auth/pages/login/login.component").then(
+            (m) => m.LoginComponent,
+          ),
+      },
     ],
   },
 ];

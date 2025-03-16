@@ -1,5 +1,3 @@
-import { interval } from "rxjs";
-
 export enum AuthRole {
   USER = "user",
   ORGANIZER = "organizer",
@@ -13,12 +11,21 @@ export interface RegisterUserRequest {
   role: AuthRole;
 }
 
+export interface LoginUserRequest {
+  email: string;
+  password: string;
+}
+
 export interface User {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   role: Role;
+}
+
+export interface AuthenticationResponse {
+  token: string;
 }
 
 export interface Role {
