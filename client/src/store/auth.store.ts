@@ -32,6 +32,8 @@ export const useAuthStore = create<AuthState>()(
       error: null,
 
       login: async (credentials) => {
+        console.log("lsjdfldsf");
+        
         try {
           set({ isLoading: true, error: null });
           const response = await AuthService.login(credentials);

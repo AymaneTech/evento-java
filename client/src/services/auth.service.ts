@@ -16,6 +16,8 @@ export const AuthService = {
   },
 
   login: async (credentials: UserLoginRequestDto): Promise<AuthenticationResponseDto> => {
+    console.log("heere here");
+
     const response = await apiClient.post<AuthenticationResponseDto>(`${API_PATH}/login`, credentials);
     const { token, refreshToken } = response.data;
 
