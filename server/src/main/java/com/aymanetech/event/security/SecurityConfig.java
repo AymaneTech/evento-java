@@ -46,9 +46,9 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers(WHITE_LIST).permitAll()
-                        .requestMatchers("api/v1/users").permitAll()
-                        .anyRequest().authenticated()
+//                        .requestMatchers(WHITE_LIST).permitAll()
+//                        .requestMatchers("api/v1/users").permitAll()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(configurer -> configurer.jwt(withDefaults()))

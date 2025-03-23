@@ -14,12 +14,14 @@ import com.aymanetech.event.user.application.service.AuthenticationService;
 import com.aymanetech.event.user.application.service.RoleService;
 import com.aymanetech.event.user.domain.entity.User;
 import com.aymanetech.event.user.domain.repository.UserRepository;
+import com.aymanetech.event.user.domain.vo.RoleId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static com.aymanetech.event.user.domain.vo.UserStatus.ACTIVE;
 import static com.aymanetech.event.user.domain.vo.UserStatus.PENDING;
 
 @ApplicationService
@@ -36,12 +38,13 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     @Override
     public UserResponseDto registerNewUser(RegisterNewUserRequestDto request) {
-        var defaultRole = roleService.findRoleByName(DEFAULT_USER_ROLE);
+        var role = roleService.findRoleEntityById(RoleId.of(request.roleId()));
+        var status = role.getName().equals(DEFAULT_USER_ROLE) ? ACTIVE : PENDING;
 
         var user = mapper.toEntity(request)
                 .setPassword(passwordEncoder.encode(request.password()))
-                .setRole(defaultRole)
-                .setStatus(PENDING);
+                .setRole(role)
+                .setStatus(status);
 
         var savedUser = repository.save(user);
         return mapper.toResponseDto(savedUser);
