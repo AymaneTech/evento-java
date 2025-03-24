@@ -1,13 +1,16 @@
-import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../store/auth.store";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
-import { Alert, AlertDescription } from "../../components/ui/alert";
-import { Loader2, AlertCircle } from "lucide-react";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../store/auth.store';
+import { decodeToken, saveUserSession } from '../../lib/jwt.util';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
+import { Alert, AlertDescription } from '../../components/ui/alert';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Cookies from 'js-cookie';
 import {
   Form,
   FormControl,
@@ -15,70 +18,75 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../components/ui/form";
+} from '../../components/ui/form';
+import { ACCESS_TOKEN_KEY } from '../../api/axios';
 
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+export default function Login() {
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { login, isLoading, parsedError, clearError } = useAuthStore();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      await login({
-        email: values.email,
-        password: values.password,
-      });
+      await login(values);
 
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Login error:", err);
-    }
-  };
+      const accessToken = Cookies.get(ACCESS_TOKEN_KEY);
+      console.log('Access Token:', accessToken);
+      if (accessToken) {
+        const decodedToken = decodeToken(accessToken);
+        console.log('Decoded Token:', decodedToken);
 
-  const parseErrorMessage = (error: string | null) => {
-    if (!error) return null;
+        if (decodedToken) {
+          // Store user information in session
+          saveUserSession({
+            id: decodedToken.id?.value,
+            email: decodedToken.email,
+            firstName: decodedToken.name?.firstName,
+            lastName: decodedToken.name?.lastName,
+            authorities: decodedToken.authorities,
+          });
 
-    try {
-      const errorObj = JSON.parse(error);
-
-      // Check if the error has a detailed message
-      if (errorObj.errors) {
-        // Handle case where errors is a string
-        if (typeof errorObj.errors === 'string') {
-          return errorObj.errors;
+          // Redirect based on role
+          const redirectPath = getRedirectPathByRole(decodedToken.authorities);
+          navigate(redirectPath);
+        } else {
+          setErrorMessage('Invalid token received. Please try logging in again.');
         }
-
-        // Handle case where errors is an object with field-specific errors
-        if (typeof errorObj.errors === 'object') {
-          return Object.entries(errorObj.errors)
-            .map(([field, message]) => `${field}: ${message}`)
-            .join(', ');
-        }
+      } else {
+        setErrorMessage('Authentication failed. Please try again.');
       }
-
-      // Fallback to message if available
-      return errorObj.message || error;
-    } catch (e) {
-      // If not valid JSON, return the original error
-      return error;
+    } catch (error) {
+      console.error('Login error:', error);
+      // The error is already handled by the auth store
     }
   };
 
-  const errorMessage = parseErrorMessage(error);
+  // Function to determine redirect path based on user role
+  const getRedirectPathByRole = (authorities: string[] = []): string => {
+    if (authorities.includes('ROLE_ADMIN')) {
+      return '/dashboard';
+    } else if (authorities.includes('ROLE_ORGANIZER')) {
+      return '/organizer/dashboard';
+    } else if (authorities.includes('ROLE_USER')) {
+      return '/';
+    }
+    return '/';
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -88,15 +96,18 @@ export default function LoginPage() {
           <CardDescription>Enter your email and password to sign in</CardDescription>
         </CardHeader>
         <CardContent>
-          {errorMessage && (
+          {(errorMessage || parsedError) && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{errorMessage}</AlertDescription>
+              <AlertDescription>{errorMessage || parsedError}</AlertDescription>
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-4 w-4 ml-auto"
-                onClick={clearError}
+                onClick={() => {
+                  setErrorMessage(null);
+                  clearError();
+                }}
               >
                 ×
               </Button>
@@ -174,17 +185,6 @@ export default function LoginPage() {
           </p>
         </CardFooter>
       </Card>
-      {import.meta.env.DEV && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <Button
-            onClick={() => console.log("Form values:", form.getValues(), "Errors:", form.formState.errors)}
-            variant="outline"
-            size="sm"
-          >
-            Debug
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

@@ -39,7 +39,8 @@ public class DefaultAuthenticationService implements AuthenticationService {
     @Override
     public UserResponseDto registerNewUser(RegisterNewUserRequestDto request) {
         var role = roleService.findRoleEntityById(RoleId.of(request.roleId()));
-        var status = role.getName().equals(DEFAULT_USER_ROLE) ? ACTIVE : PENDING;
+        // var status = role.getName().equals(DEFAULT_USER_ROLE) ? ACTIVE : PENDING;
+        var status = ACTIVE; // todo: if user is orgnaizer or admin make request in pending status
 
         var user = mapper.toEntity(request)
                 .setPassword(passwordEncoder.encode(request.password()))

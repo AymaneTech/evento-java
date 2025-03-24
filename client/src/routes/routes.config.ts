@@ -1,21 +1,28 @@
-import { lazy } from 'react';
+import { lazy } from "react";
+import AdminLayout from "../layout/admin-layout.tsx";
+import EventsList from "../pages/admin/event/event-list.tsx";
 
 export interface RouteConfig {
   path: string;
   component: React.ComponentType<any>;
   exact?: boolean;
   protected?: boolean;
+  children?: RouteConfig[];
   roles?: string[];
 }
 
-const Home = lazy(() => import('../Home'));
-const Login = lazy(() => import("../pages/auth/Login.page.tsx"))
-const Register = lazy(() => import("../pages/auth/Register.page.tsx"))
-const ChangePassword = lazy(() => import("../pages/auth/ChangePassword.page.tsx"))
-const RegistrationSuccess = lazy(() => import("../pages/auth/RegistrationSuccess.page.tsx"))
+const Home = lazy(() => import("../Home"));
+const Login = lazy(() => import("../pages/auth/Login.page.tsx"));
+const Register = lazy(() => import("../pages/auth/Register.page.tsx"));
+const ChangePassword = lazy(() => import("../pages/auth/ChangePassword.page.tsx"));
+const RegistrationSuccess = lazy(() => import("../pages/auth/RegistrationSuccess.page.tsx"));
+const CategoriesList = lazy(() => import("../pages/admin/category/categories-list.tsx"));
+const EventList = lazy(() => import("../pages/admin/event/event-list.tsx"));
+// const AdminLayout = lazy(() => import("../layout/admin-layout.tsx"));
 
-const NotFound = lazy(() => import("../pages/error/NotFound.page.tsx"))
-const Unauthorized = lazy(() => import("../pages/error/Unauthorized.page.tsx"))
+
+const NotFound = lazy(() => import("../pages/error/NotFound.page.tsx"));
+const Unauthorized = lazy(() => import("../pages/error/Unauthorized.page.tsx"));
 
 export const publicRoutes: RouteConfig[] = [
   {
@@ -44,8 +51,22 @@ export const publicRoutes: RouteConfig[] = [
   },
   {
     path: "registeration-success",
-    component: RegistrationSuccess
-  }
+    component: RegistrationSuccess,
+  },
+  {
+    path: "dashboard",
+    component: AdminLayout,
+    children: [
+      {
+        path: "categories",
+        component: CategoriesList,
+      },
+      {
+        path: "events",
+        component: EventsList,
+      },
+    ],
+  },
 ];
 
 export const protectedRoutes: RouteConfig[] = [
@@ -56,11 +77,10 @@ export const protectedRoutes: RouteConfig[] = [
   },
 ];
 
-export const adminRoutes: RouteConfig[] = [
-];
+export const adminRoutes: RouteConfig[] = [];
 
 export const allRoutes: RouteConfig[] = [
   ...publicRoutes,
   ...protectedRoutes,
-  ...adminRoutes
+  ...adminRoutes,
 ];

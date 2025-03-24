@@ -20,7 +20,7 @@ export function useApi<T = any>(
   config: AxiosRequestConfig = {}
 ) {
   const { onSuccess, onError, immediate = true } = options;
-  
+
   const [state, setState] = useState<ApiState<T>>({
     data: null,
     loading: immediate,
@@ -29,11 +29,11 @@ export function useApi<T = any>(
 
   const fetchData = useCallback(async (payload?: any) => {
     setState((prev) => ({ ...prev, loading: true, error: null }));
-    
+
     try {
       const method = config.method?.toLowerCase() || 'get';
       let response;
-      
+
       if (method === 'get') {
         response = await apiClient.get<T>(url, config);
       } else if (method === 'post') {
@@ -49,7 +49,7 @@ export function useApi<T = any>(
           data: payload,
         });
       }
-      
+
       setState({ data: response.data, loading: false, error: null });
       onSuccess?.(response.data);
       return response.data;
@@ -80,7 +80,7 @@ export function useApiMutation<T = any, P = any>(
   config: AxiosRequestConfig = {}
 ) {
   const { onSuccess, onError } = options;
-  
+
   const [state, setState] = useState<ApiState<T>>({
     data: null,
     loading: false,
@@ -89,7 +89,7 @@ export function useApiMutation<T = any, P = any>(
 
   const mutate = useCallback(async (payload?: P) => {
     setState({ data: null, loading: true, error: null });
-    
+
     try {
       const method = config.method || 'post';
       const response = await apiClient.request<T>({
@@ -98,7 +98,7 @@ export function useApiMutation<T = any, P = any>(
         url,
         data: payload,
       });
-      
+
       setState({ data: response.data, loading: false, error: null });
       onSuccess?.(response.data);
       return response.data;
@@ -123,9 +123,10 @@ export function useAuth() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await apiClient.get('/auth/me');
+        // await apiClient.get('/auth/me');
         setIsAuthenticated(true);
       } catch (error) {
+        console.log(error);
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
