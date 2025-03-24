@@ -27,45 +27,45 @@ export const createApiClient = (): AxiosInstance => {
     (error) => Promise.reject(error)
   );
 
-  apiClient.interceptors.response.use(
-    (response) => response,
-    async (error: AxiosError) => {
-      const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
-
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
-
-        try {
-          const refreshToken = Cookies.get(REFRESH_TOKEN_KEY);
-
-          if (!refreshToken) {
-            handleLogout();
-            return Promise.reject(error);
-          }
-
-          const response = await axios.post(
-            `${API_BASE_URL}/auth/refresh`,
-            { refreshToken }
-          );
-
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-          setAuthTokens(accessToken, newRefreshToken);
-
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          }
-
-          return apiClient(originalRequest);
-        } catch (refreshError) {
-          handleLogout();
-          return Promise.reject(refreshError);
-        }
-      }
-
-      return Promise.reject(error);
-    }
-  );
+  // apiClient.interceptors.response.use(
+  //   (response) => response,
+  //   async (error: AxiosError) => {
+  //     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+  //
+  //     if (error.response?.status === 401 && !originalRequest._retry) {
+  //       originalRequest._retry = true;
+  //
+  //       try {
+  //         const refreshToken = Cookies.get(REFRESH_TOKEN_KEY);
+  //
+  //         if (!refreshToken) {
+  //           handleLogout();
+  //           return Promise.reject(error);
+  //         }
+  //
+  //         const response = await axios.post(
+  //           `${API_BASE_URL}/auth/refresh`,
+  //           { refreshToken }
+  //         );
+  //
+  //         const { accessToken, refreshToken: newRefreshToken } = response.data;
+  //
+  //         setAuthTokens(accessToken, newRefreshToken);
+  //
+  //         if (originalRequest.headers) {
+  //           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+  //         }
+  //
+  //         return apiClient(originalRequest);
+  //       } catch (refreshError) {
+  //         handleLogout();
+  //         return Promise.reject(refreshError);
+  //       }
+  //     }
+  //
+  //     return Promise.reject(error);
+  //   }
+  // );
 
   return apiClient;
 };

@@ -1,15 +1,21 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useAuthStore } from "../../store/auth.store";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
 import { Alert, AlertDescription } from "../../components/ui/alert";
-import { Loader2, AlertCircle } from 'lucide-react';
-import apiClient, { setAuthTokens } from "../../api/axios";
+import { Loader2, AlertCircle } from "lucide-react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../../components/ui/form";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -20,8 +26,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { login, isLoading, error, clearError } = useAuthStore();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -31,32 +36,49 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = async (data: LoginFormValues, e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
+  const onSubmit = async (values: LoginFormValues) => {
     try {
-      console.log("Submitting login data:", data);
+      await login({
+        email: values.email,
+        password: values.password,
+      });
 
-      const response = await apiClient.post("/auth/login", data);
-
-      console.log("Login response:", response.data);
-
-      // setAuthTokens(response.data.token, response.data.refreshToken);
-
-      // navigate("/dashboard");
-    } catch (err: any) {
+      navigate("/dashboard");
+    } catch (err) {
       console.error("Login error:", err);
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        "Login failed. Please check your credentials and try again."
-      );
-    } finally {
-      setIsLoading(false);
     }
   };
+
+  const parseErrorMessage = (error: string | null) => {
+    if (!error) return null;
+
+    try {
+      const errorObj = JSON.parse(error);
+
+      // Check if the error has a detailed message
+      if (errorObj.errors) {
+        // Handle case where errors is a string
+        if (typeof errorObj.errors === 'string') {
+          return errorObj.errors;
+        }
+
+        // Handle case where errors is an object with field-specific errors
+        if (typeof errorObj.errors === 'object') {
+          return Object.entries(errorObj.errors)
+            .map(([field, message]) => `${field}: ${message}`)
+            .join(', ');
+        }
+      }
+
+      // Fallback to message if available
+      return errorObj.message || error;
+    } catch (e) {
+      // If not valid JSON, return the original error
+      return error;
+    }
+  };
+
+  const errorMessage = parseErrorMessage(error);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -66,68 +88,87 @@ export default function LoginPage() {
           <CardDescription>Enter your email and password to sign in</CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
+          {errorMessage && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{errorMessage}</AlertDescription>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-4 w-4 ml-auto"
+                onClick={clearError}
+              >
+                ×
+              </Button>
             </Alert>
           )}
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                {...form.register("email")}
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="name@example.com"
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="email"
+                        autoComplete="email"
+                        placeholder="name@example.com"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {form.formState.errors.email && (
-                <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Button
-                  variant="link"
-                  className="px-0 font-normal"
-                  type="button"
-                  onClick={() => navigate("/forgot-password")}
-                >
-                  Forgot password?
-                </Button>
-              </div>
-              <Input
-                {...form.register("password")}
-                id="password"
-                type="password"
-                autoComplete="current-password"
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Password</FormLabel>
+                      <Button
+                        variant="link"
+                        className="px-0 font-normal"
+                        type="button"
+                        onClick={() => navigate("/forgot-password")}
+                      >
+                        Forgot password?
+                      </Button>
+                    </div>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        autoComplete="current-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {form.formState.errors.password && (
-                <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>
-              )}
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </Button>
-          </form>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
-            <Button
-              variant="link"
-              className="px-0"
-              onClick={() => navigate("/register")}
-            >
+            <Button variant="link" className="px-0" onClick={() => navigate("/register")}>
               Sign up
             </Button>
           </p>

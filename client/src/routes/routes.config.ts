@@ -12,6 +12,7 @@ const Home = lazy(() => import('../Home'));
 const Login = lazy(() => import("../pages/auth/Login.page.tsx"))
 const Register = lazy(() => import("../pages/auth/Register.page.tsx"))
 const ChangePassword = lazy(() => import("../pages/auth/ChangePassword.page.tsx"))
+const RegistrationSuccess = lazy(() => import("../pages/auth/RegistrationSuccess.page.tsx"))
 
 const NotFound = lazy(() => import("../pages/error/NotFound.page.tsx"))
 const Unauthorized = lazy(() => import("../pages/error/Unauthorized.page.tsx"))
@@ -41,6 +42,10 @@ export const publicRoutes: RouteConfig[] = [
     path: "/unauthorized",
     component: Unauthorized,
   },
+  {
+    path: "registeration-success",
+    component: RegistrationSuccess
+  }
 ];
 
 export const protectedRoutes: RouteConfig[] = [

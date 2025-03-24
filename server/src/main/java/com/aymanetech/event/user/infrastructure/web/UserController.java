@@ -4,6 +4,7 @@ import com.aymanetech.event.user.application.dto.request.UpdateUserRequestDto;
 import com.aymanetech.event.user.application.dto.response.UserResponseDto;
 import com.aymanetech.event.user.application.service.UserService;
 import com.aymanetech.event.user.domain.vo.UserId;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Integer id, @RequestBody UpdateUserRequestDto dto) {
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Integer id, @RequestBody @Valid UpdateUserRequestDto dto) {
         UserResponseDto user = userService.updateUser(UserId.of(id), dto);
         return ResponseEntity.ok(user);
     }

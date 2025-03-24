@@ -33,7 +33,7 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (credentials) => {
         console.log("lsjdfldsf");
-        
+
         try {
           set({ isLoading: true, error: null });
           const response = await AuthService.login(credentials);
@@ -55,10 +55,6 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
           await AuthService.register(userData);
-          await get().login({
-            email: userData.email,
-            password: userData.password
-          });
         } catch (error) {
           set({
             isLoading: false,

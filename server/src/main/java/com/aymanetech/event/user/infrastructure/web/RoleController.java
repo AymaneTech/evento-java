@@ -4,6 +4,7 @@ import com.aymanetech.event.user.application.dto.request.RoleRequestDto;
 import com.aymanetech.event.user.application.dto.response.RoleResponseDto;
 import com.aymanetech.event.user.application.service.RoleService;
 import com.aymanetech.event.user.domain.vo.RoleId;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class RoleController {
     private final RoleService roleService;
 
     @PostMapping
-    public ResponseEntity<RoleResponseDto> createRole(@RequestBody RoleRequestDto dto) {
+    public ResponseEntity<RoleResponseDto> createRole(@RequestBody @Valid RoleRequestDto dto) {
         RoleResponseDto role = roleService.createNewRole(dto);
         return ResponseEntity.created(getUri(BASE_URL, role.id()))
                 .body(role);
@@ -39,7 +40,7 @@ public class RoleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RoleResponseDto> updateRole(@PathVariable Long id, @RequestBody RoleRequestDto dto) {
+    public ResponseEntity<RoleResponseDto> updateRole(@PathVariable Long id, @RequestBody @Valid RoleRequestDto dto) {
         RoleResponseDto role = roleService.updateRole(RoleId.of(id), dto);
         return ResponseEntity.ok(role);
     }

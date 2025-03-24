@@ -1,104 +1,77 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useApiMutation } from "../../api/hooks.ts";
-import { Button } from "../../components/ui/button.tsx";
-import { Input } from "../../components/ui/input.tsx";
-import { Label } from "../../components/ui/label.tsx";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card.tsx";
-import { Alert, AlertDescription } from "../../components/ui/alert.tsx";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select.tsx";
-import { Loader2, AlertCircle } from 'lucide-react';
-import { RegisterNewUserRequestDto, UserResponseDto, UserLoginRequestDto, AuthenticationResponseDto } from "../../types/auth.types.ts";
-import { setAuthTokens } from "../../api/axios.ts";
+import { useEffect } from "react";
+import { useAuthStore } from "../../store/auth.store";
+import { useRoleStore } from "../../store/role.store";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Loader2, AlertCircle } from "lucide-react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../../components/ui/form";
+
+const registerSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+  roleId: z.number().int().positive()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"]
+});
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    roleId: 2, // Default to user role
+  const { register, isLoading, error, clearError } = useAuthStore();
+  const { roles, fetchAllRoles, isLoading: rolesLoading, error: rolesError } = useRoleStore();
+
+  useEffect(() => {
+    fetchAllRoles();
+  }, [fetchAllRoles]);
+
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      roleId: 2, // Default to user role
+    },
   });
-  const [passwordError, setPasswordError] = useState("");
 
-  // Register mutation
-  const {
-    mutate: registerMutate,
-    loading: registerLoading,
-    error: registerError
-  } = useApiMutation<UserResponseDto, RegisterNewUserRequestDto>(
-    '/auth/register',
-    {
-      onSuccess: async (data) => {
-        console.log("Registration successful, proceeding to login");
-        // After successful registration, login automatically
-        await loginMutate({
-          email: formData.email,
-          password: formData.password
-        });
-      }
-    }
-  );
-
-  // Login mutation (used after registration)
-  const {
-    mutate: loginMutate,
-    loading: loginLoading,
-    error: loginError
-  } = useApiMutation<AuthenticationResponseDto, UserLoginRequestDto>(
-    '/auth/login',
-    {
-      onSuccess: (data) => {
-        // Store tokens
-        setAuthTokens(data.token, data.refreshToken);
-        // Navigate to dashboard
-        navigate("/dashboard");
-      }
-    }
-  );
-
-  const isLoading = registerLoading || loginLoading;
-  const error = registerError || loginError;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (passwordError) setPasswordError("");
-  };
-
-  const handleRoleChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, roleId: Number.parseInt(value) }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Register form submitted, default prevented");
-
-    if (formData.password !== formData.confirmPassword) {
-      setPasswordError("Passwords do not match");
-      return;
-    }
-
+  const onSubmit = async (values: RegisterFormValues) => {
     try {
-      await registerMutate({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        roleId: formData.roleId,
+      await register({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+        roleId: values.roleId,
       });
+
+      navigate("registeration-success");
     } catch (err) {
       console.error("Registration error:", err);
-      // Error is handled by the hook
     }
   };
 
-  // Extract error message from AxiosError or Error
-  const errorMessage = error ?
-    (error as any).response?.data?.message || error.message || "Registration failed"
-    : null;
+  const errorMessage = error || rolesError || null;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -112,85 +85,145 @@ export default function RegisterPage() {
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{errorMessage}</AlertDescription>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-4 w-4 ml-auto"
+                onClick={clearError}
+              >
+                ×
+              </Button>
             </Alert>
           )}
-          {passwordError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{passwordError}</AlertDescription>
-            </Alert>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" name="firstName" required value={formData.firstName} onChange={handleChange} />
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" name="lastName" required value={formData.lastName} onChange={handleChange} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
+
+              <FormField
+                control={form.control}
                 name="email"
-                type="email"
-                autoComplete="email"
-                required
-                placeholder="name@example.com"
-                value={formData.email}
-                onChange={handleChange}
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="email"
+                        autoComplete="email"
+                        placeholder="name@example.com"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
+
+              <FormField
+                control={form.control}
                 name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        autoComplete="new-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
+
+              <FormField
+                control={form.control}
                 name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        autoComplete="new-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <Select onValueChange={handleRoleChange} defaultValue={formData.roleId.toString()}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Admin</SelectItem>
-                  <SelectItem value="2">User</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {registerLoading ? "Creating account..." : "Signing in..."}
-                </>
-              ) : (
-                "Create account"
-              )}
-            </Button>
-          </form>
+
+              <FormField
+                control={form.control}
+                name="roleId"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Role</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      defaultValue={field.value.toString()}
+                      disabled={rolesLoading || roles.length === 0}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={rolesLoading ? "Loading roles..." : "Select a role"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {roles.map(role => (
+                          <SelectItem key={role.id} value={role.id.toString()}>
+                            {role.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" className="w-full" disabled={isLoading || rolesLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  "Create account"
+                )}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
@@ -201,18 +234,6 @@ export default function RegisterPage() {
           </p>
         </CardFooter>
       </Card>
-      {import.meta.env.DEV && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <Button
-            onClick={() => console.log("Form data:", formData, "Error:", error)}
-            variant="outline"
-            size="sm"
-          >
-            Debug
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
-
