@@ -18,6 +18,7 @@ public interface UserMapper {
 
     @Mapping(target = "firstName", source = "name.firstName")
     @Mapping(target = "lastName", source = "name.lastName")
+    @Mapping(target = "id", source = "id.value")
     UserResponseDto toResponseDto(User user);
 
     void updateEntity(@MappingTarget User entity, UpdateUserRequestDto request);
