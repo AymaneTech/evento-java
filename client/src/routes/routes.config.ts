@@ -1,6 +1,5 @@
 import { lazy } from "react";
 import AdminLayout from "../layout/admin-layout.tsx";
-import EventsList from "../pages/admin/event/event-list.tsx";
 
 export interface RouteConfig {
   path: string;
@@ -18,7 +17,8 @@ const ChangePassword = lazy(() => import("../pages/auth/ChangePassword.page.tsx"
 const RegistrationSuccess = lazy(() => import("../pages/auth/RegistrationSuccess.page.tsx"));
 const CategoriesList = lazy(() => import("../pages/admin/category/categories-list.tsx"));
 const EventList = lazy(() => import("../pages/admin/event/event-list.tsx"));
-// const AdminLayout = lazy(() => import("../layout/admin-layout.tsx"));
+const Profile = lazy(() => import("../pages/profile/profile.page.tsx"))
+const UserList = lazy(() => import("../pages/admin/user/user-list.page.tsx"))
 
 
 const NotFound = lazy(() => import("../pages/error/NotFound.page.tsx"));
@@ -42,6 +42,10 @@ export const publicRoutes: RouteConfig[] = [
     component: Register,
   },
   {
+    path: "/profile",
+    component: Profile,
+  },
+  {
     path: "*",
     component: NotFound,
   },
@@ -63,8 +67,12 @@ export const publicRoutes: RouteConfig[] = [
       },
       {
         path: "events",
-        component: EventsList,
+        component: EventList,
       },
+      {
+        path: "users",
+        component: UserList
+      }
     ],
   },
 ];

@@ -33,7 +33,6 @@ export default function AdminLayout () {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
 
-  // Check if we're on mobile
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768)
@@ -90,10 +89,10 @@ export default function AdminLayout () {
             </div>
             <div className="flex-1 overflow-auto py-2">
               <nav className="grid items-start px-2 text-sm">
-                <SidebarItem icon={LayoutDashboard} title="Dashboard" href="/admin/dashboard" />
-                <SidebarItem icon={Calendar} title="Events" href="/admin/events" />
-                <SidebarItem icon={Tag} title="Categories" href="/admin/categories" isActive={true} />
-                <SidebarItem icon={Users} title="Users" href="/admin/users" />
+                <SidebarItem icon={LayoutDashboard} title="Dashboard" href="/dashboard" />
+                <SidebarItem icon={Calendar} title="Events" href="/dashboard/events" />
+                <SidebarItem icon={Tag} title="Categories" href="/dashboard/categories" isActive={true} />
+                <SidebarItem icon={Users} title="Users" href="/dashboard/users" />
                 <SidebarItem icon={Settings} title="Settings" href="/admin/settings" />
               </nav>
             </div>
@@ -114,8 +113,8 @@ export default function AdminLayout () {
         <main
           className={cn(
             "flex-1 transition-all duration-200 ease-in-out",
-            !isMobile && "ml-64", // Always apply margin on desktop
-            isMobile && sidebarOpen && "ml-64", // Apply margin on mobile only when sidebar is open
+            !isMobile && "ml-64",
+            isMobile && sidebarOpen && "ml-64",
           )}
         >
           <div className="container mx-auto p-6">

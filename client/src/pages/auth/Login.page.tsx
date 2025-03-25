@@ -1,92 +1,47 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../store/auth.store';
-import { decodeToken, saveUserSession } from '../../lib/jwt.util';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Loader2, AlertCircle } from 'lucide-react';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Cookies from 'js-cookie';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '../../components/ui/form';
-import { ACCESS_TOKEN_KEY } from '../../api/axios';
+"use client"
+
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAuthStore } from "../../store/auth.store"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
+import { Alert, AlertDescription } from "../../components/ui/alert"
+import { Loader2, AlertCircle } from "lucide-react"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../components/ui/form"
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+})
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function Login() {
-  const navigate = useNavigate();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { login, isLoading, parsedError, clearError } = useAuthStore();
+  const navigate = useNavigate()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { login, isLoading, parsedError, clearError } = useAuthStore()
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
-  });
+  })
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      await login(values);
-
-      const accessToken = Cookies.get(ACCESS_TOKEN_KEY);
-      console.log('Access Token:', accessToken);
-      if (accessToken) {
-        const decodedToken = decodeToken(accessToken);
-        console.log('Decoded Token:', decodedToken);
-
-        if (decodedToken) {
-          // Store user information in session
-          saveUserSession({
-            id: decodedToken.id?.value,
-            email: decodedToken.email,
-            firstName: decodedToken.name?.firstName,
-            lastName: decodedToken.name?.lastName,
-            authorities: decodedToken.authorities,
-          });
-
-          // Redirect based on role
-          const redirectPath = getRedirectPathByRole(decodedToken.authorities);
-          navigate(redirectPath);
-        } else {
-          setErrorMessage('Invalid token received. Please try logging in again.');
-        }
-      } else {
-        setErrorMessage('Authentication failed. Please try again.');
-      }
+      const redirectPath = await login(values)
+      navigate(redirectPath)
     } catch (error) {
-      console.error('Login error:', error);
-      // The error is already handled by the auth store
+      console.error("Login error:", error)
+      setErrorMessage("Authentication failed. Please check your credentials and try again.")
     }
-  };
-
-  // Function to determine redirect path based on user role
-  const getRedirectPathByRole = (authorities: string[] = []): string => {
-    if (authorities.includes('ROLE_ADMIN')) {
-      return '/dashboard';
-    } else if (authorities.includes('ROLE_ORGANIZER')) {
-      return '/organizer/dashboard';
-    } else if (authorities.includes('ROLE_USER')) {
-      return '/';
-    }
-    return '/';
-  };
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -105,8 +60,8 @@ export default function Login() {
                 size="sm"
                 className="h-4 w-4 ml-auto"
                 onClick={() => {
-                  setErrorMessage(null);
-                  clearError();
+                  setErrorMessage(null)
+                  clearError()
                 }}
               >
                 ×
@@ -123,12 +78,7 @@ export default function Login() {
                   <FormItem className="space-y-2">
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type="email"
-                        autoComplete="email"
-                        placeholder="name@example.com"
-                      />
+                      <Input {...field} type="email" autoComplete="email" placeholder="name@example.com" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -152,11 +102,7 @@ export default function Login() {
                       </Button>
                     </div>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type="password"
-                        autoComplete="current-password"
-                      />
+                      <Input {...field} type="password" autoComplete="current-password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -186,5 +132,7 @@ export default function Login() {
         </CardFooter>
       </Card>
     </div>
-  );
+  )
 }
+
+

@@ -41,7 +41,7 @@ export const EventForm: React.FC<EventFormProps> = ({ onSubmit, initialData, isS
         description: initialData.description,
         numberOfSeats: initialData.numberOfSeats,
         price: initialData.price,
-        date: new Date(initialData.date).toISOString().slice(0, 16), // Format for datetime-local input
+        date: new Date(initialData.date).toISOString().slice(0, 16),
         location: initialData.location,
         bookingType: initialData.bookingType,
         categoryId: initialData.category.id,
@@ -52,16 +52,15 @@ export const EventForm: React.FC<EventFormProps> = ({ onSubmit, initialData, isS
         description: "",
         numberOfSeats: 1,
         price: 0,
-        date: new Date().toISOString().slice(0, 16), // Current date formatted for datetime-local input
+        date: new Date().toISOString().slice(0, 16),
         location: "",
         bookingType: BookingType.AUTOMATIC,
         categoryId: 0,
-        userId: Number(currentUserId), // Convert string ID to number
+        userId: Number(currentUserId),
       },
   });
 
   const handleSubmit = (data: EventFormValues) => {
-    // Convert string values to numbers where needed
     const formattedData = {
       ...data,
       numberOfSeats: Number(data.numberOfSeats),
