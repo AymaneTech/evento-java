@@ -30,12 +30,12 @@ const Unauthorized = lazy(() => import("../pages/error/Unauthorized.page.tsx"));
 
 export const publicRoutes: RouteConfig[] = [
   {
-    path: "",
+    path: "/",
     component: MainLayout,
     children: [
 
       {
-        path: "",
+        path: "/",
         component: Home,
       },
       {
@@ -43,7 +43,7 @@ export const publicRoutes: RouteConfig[] = [
         component: Events,
       },
       {
-        path: "/event/detail",
+        path: "/events/:id",
         component: EventDetails,
       },
       {

@@ -19,5 +19,5 @@ public record EventResponseDto(@NotNull Long id,
                                @NotBlank String location,
                                BookingType bookingType,
                                @NotNull NestedCategory category,
-                               @NotNull NestedUser user) {
+                               @NotNull NestedUser organiser) {
 }

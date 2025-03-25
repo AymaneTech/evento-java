@@ -1,6 +1,3 @@
-import { Category } from "./category.types";
-import { User } from "./user.types";
-
 export enum BookingType {
   AUTOMATIC = "AUTOMATIC",
   MANUAL = "MANUAL"
@@ -12,9 +9,10 @@ export interface NestedCategory {
   slug: string;
 }
 
-export interface NestedUser {
+export interface NestedOrganizer {
   id: number;
-  username: string;
+  firstName: string;
+  lastName: string;
   email: string;
 }
 
@@ -29,7 +27,7 @@ export interface EventResponseDto {
   location: string;
   bookingType: BookingType;
   category: NestedCategory;
-  user: NestedUser;
+  organiser: NestedOrganizer;
 }
 
 export interface EventRequestDto {
@@ -55,7 +53,7 @@ export interface Event {
   location: string;
   bookingType: BookingType;
   category: NestedCategory;
-  user: NestedUser;
+  organiser: NestedOrganizer;
 }
 
 export interface EventsPage {

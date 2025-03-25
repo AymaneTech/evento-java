@@ -18,11 +18,13 @@ export default function HomePage() {
   const [featuredEvents, setFeaturedEvents] = useState<Event[]>([])
 
   useEffect(() => {
+    console.log("hello use effect ");
     fetchAllEvents()
     fetchAllCategories()
   }, [])
 
   useEffect(() => {
+    console.log("hello ");
     if (events.length > 0) {
       setFeaturedEvents(events.slice(0, 5))
     }
@@ -56,7 +58,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="hidden md:block">
-              <img src="/placeholder.svg?height=400&width=600" alt="Events collage" className="rounded-lg shadow-lg" />
+              <img src="https://developer.epages.com/assets/img/pages/headers/private/spring-io-18-header.jpg" alt="Events collage" className="rounded-lg shadow-lg" />
             </div>
           </div>
         </div>

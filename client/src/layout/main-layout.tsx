@@ -1,7 +1,5 @@
-import type React from "react"
-
 import { useState, useEffect } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, Outlet, useLocation } from "react-router-dom"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,11 +14,8 @@ import { cn } from "../lib/utils"
 import { Button } from "../components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 
-interface MainLayoutProps {
-  children: React.ReactNode
-}
 
-export function MainLayout({ children }: MainLayoutProps) {
+export function MainLayout() {
   const location = useLocation()
   const { isAuthenticated, logout } = useAuthStore()
   const { fullName, isAdmin, isOrganizer } = useUserInfo()
@@ -208,7 +203,9 @@ export function MainLayout({ children }: MainLayoutProps) {
       </header>
 
       {/* Main content */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <Outlet />
+      </main>
 
       {/* Footer */}
       <footer className="border-t bg-muted/40">

@@ -30,6 +30,9 @@ export default function EventDetailsPage() {
   const [relatedEvents, setRelatedEvents] = useState<Event[]>([])
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false)
 
+  console.log(selectedEvent);
+
+
   useEffect(() => {
     if (id) {
       fetchEventById(Number.parseInt(id))
@@ -124,8 +127,8 @@ export default function EventDetailsPage() {
               <Badge
                 variant="outline"
                 className={`text-sm font-normal ${selectedEvent.bookingType === BookingType.AUTOMATIC
-                    ? "bg-green-50 text-green-700 border-green-200"
-                    : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                  ? "bg-green-50 text-green-700 border-green-200"
+                  : "bg-yellow-50 text-yellow-700 border-yellow-200"
                   }`}
               >
                 {selectedEvent.bookingType === BookingType.AUTOMATIC ? "Automatic Booking" : "Manual Approval"}
@@ -183,8 +186,8 @@ export default function EventDetailsPage() {
                   <User className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="font-medium">{selectedEvent.user.username}</p>
-                  <p className="text-sm text-muted-foreground">{selectedEvent.user.email}</p>
+                  <p className="font-medium">{selectedEvent.organiser.firstName} {selectedEvent.organiser.lastName}</p>
+                  <p className="text-sm text-muted-foreground">{selectedEvent.organiser.email}</p>
                 </div>
               </div>
             </div>
