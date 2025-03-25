@@ -8,9 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "bookings")
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,13 +21,26 @@ public class Booking {
     private BookingId id;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "event_id")
     private Event event;
 
-    private Boolean isVerified;
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status = BookingStatus.PENDING;
+
+    private Integer numberOfTickets;
+
+    private BigDecimal totalPrice;
 
     @Embedded
     private Timestamp timestamp;
+
+    public Booking setEvent(Event event) {
+        this.event = event;
+        this.totalPrice = event.getPrice().multiply(BigDecimal.valueOf(numberOfTickets));
+        return this;
+    }
 }

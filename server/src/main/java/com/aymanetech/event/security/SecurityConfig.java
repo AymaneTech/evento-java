@@ -35,7 +35,8 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-resources/**",
             "/webjars/**",
-            "/api/auth/**",
+            "/api/auth/register",
+            "/api/auth/login",
     };
 
     private final JwtConfig jwtConfig;
@@ -46,8 +47,8 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-//                        .requestMatchers(WHITE_LIST).permitAll()
-//                        .requestMatchers("api/v1/users").permitAll()
+                        .requestMatchers(WHITE_LIST).permitAll()
+                        .requestMatchers("api/v1/users").permitAll()
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -93,6 +94,7 @@ public class SecurityConfig {
     AccessDeniedHandler accessDeniedHandler() {
         return new CustomAccessDeniedHandler();
     }
+
     @Bean
     AuthenticationEntryPoint authenticationEntryPoint() {
         return new CustomAuthenticationEntryPoint();

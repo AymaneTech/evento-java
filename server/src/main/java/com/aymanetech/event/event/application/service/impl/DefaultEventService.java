@@ -15,7 +15,6 @@ import com.aymanetech.event.event.domain.vo.CategoryId;
 import com.aymanetech.event.event.domain.vo.EventId;
 import com.aymanetech.event.user.application.service.OrganizerService;
 import com.aymanetech.event.user.domain.vo.UserId;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -106,7 +105,8 @@ public class DefaultEventService implements EventService {
         event.setIsVerified(!event.getIsVerified());
     }
 
-    private Event findEventEntityById(EventId id) {
+    @Override
+    public Event findEventEntityById(EventId id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event", id.value()));
     }
