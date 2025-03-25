@@ -93,7 +93,7 @@ export default function HomePage() {
                         <CardContent className="p-4 pt-0">
                           <div className="aspect-video bg-muted rounded-md mb-4 overflow-hidden">
                             <img
-                              src={`/placeholder.svg?height=200&width=400&text=${encodeURIComponent(event.title)}`}
+                              src={event.imageUrl}
                               alt={event.title}
                               className="w-full h-full object-cover"
                             />
@@ -183,7 +183,7 @@ export default function HomePage() {
                   <Card className="h-full transition-all hover:shadow-md">
                     <div className="aspect-[2/1] bg-muted overflow-hidden">
                       <img
-                        src={`/placeholder.svg?height=200&width=400&text=${encodeURIComponent(event.title)}`}
+                        src={event.imageUrl}
                         alt={event.title}
                         className="w-full h-full object-cover"
                       />

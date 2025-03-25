@@ -113,7 +113,7 @@ export default function EventDetailsPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="aspect-[2/1] bg-muted rounded-lg overflow-hidden">
             <img
-              src={`/placeholder.svg?height=400&width=800&text=${encodeURIComponent(selectedEvent.title)}`}
+              src={selectedEvent.imageUrl}
               alt={selectedEvent.title}
               className="w-full h-full object-cover"
             />

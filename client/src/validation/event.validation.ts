@@ -19,6 +19,39 @@ export const eventSchema = z.object({
   bookingType: z.nativeEnum(BookingType),
   categoryId: z.number().positive("Category ID must be positive"),
   userId: z.number().positive("User ID must be positive"),
+  image: z
+    .instanceof(File, { message: "Image is required" })
+    .optional()
+    .or(z.any())
+    .refine(
+      (file) => {
+        if (!file) return true
+
+        if (file instanceof File) {
+          const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"]
+          return validTypes.includes(file.type)
+        }
+        return true
+      },
+      {
+        message: "File must be a valid image (JPEG, PNG, or GIF)",
+      },
+    )
+    .refine(
+      (file) => {
+        if (!file) return true
+
+        if (file instanceof File) {
+          return file.size <= 5 * 1024 * 1024
+        }
+        return true
+      },
+      {
+        message: "Image must be less than 5MB",
+      },
+    ),
 })
 
 export type EventFormValues = z.infer<typeof eventSchema>
+
+

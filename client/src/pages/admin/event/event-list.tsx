@@ -1,6 +1,8 @@
+
 import { useEffect, useState } from "react"
-import { Plus, Pencil, Trash2, Loader2, CheckCircle, XCircle, Settings } from "lucide-react"
+import { Plus, Pencil, Trash2, Loader2, CheckCircle, XCircle, Settings, Image } from "lucide-react"
 import { useEventStore } from "../../../store/event.store"
+import { EventForm } from "./event-form"
 import { type Event, BookingType } from "../../../types/event.types"
 import { Button } from "../../../components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../components/ui/table"
@@ -25,9 +27,9 @@ import {
 } from "../../../components/ui/dropdown-menu"
 import { useToast } from "../../../hooks/use-toast"
 import { Pagination } from "../../../components/ui/pagination"
-import { EventFormValues } from "../../../validation/event.validation.ts";
-import { formatCurrency, formatDate } from "../../../lib/formatters.ts";
-import { EventForm } from "./event-form.tsx";
+import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar"
+import { EventFormValues } from "../../../validation/event.validation"
+import { formatCurrency, formatDate } from "../../../lib/formatters"
 
 export default function EventsList() {
   const { toast } = useToast()
@@ -52,7 +54,7 @@ export default function EventsList() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
 
-  const currentUserId = 1 // Replace with actual user ID from auth context
+  const currentUserId = 1
 
   useEffect(() => {
     fetchAllEvents()
@@ -202,6 +204,7 @@ export default function EventsList() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Image</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Location</TableHead>
@@ -215,13 +218,24 @@ export default function EventsList() {
             <TableBody>
               {events.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
+                  <TableCell colSpan={9} className="h-24 text-center">
                     No events found
                   </TableCell>
                 </TableRow>
               ) : (
                 events.map((event) => (
                   <TableRow key={event.id}>
+                    <TableCell>
+                      <Avatar className="h-10 w-10">
+                        {event.imageUrl ? (
+                          <AvatarImage src={event.imageUrl} alt={event.title} />
+                        ) : (
+                          <AvatarFallback>
+                            <Image className="h-4 w-4" />
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                    </TableCell>
                     <TableCell className="font-medium">{event.title}</TableCell>
                     <TableCell>{formatDate(event.date)}</TableCell>
                     <TableCell>{event.location}</TableCell>
@@ -230,11 +244,10 @@ export default function EventsList() {
                     <TableCell>{event.category.name}</TableCell>
                     <TableCell>
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          event.bookingType === BookingType.AUTOMATIC
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${event.bookingType === BookingType.AUTOMATIC
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
-                        }`}
+                          }`}
                       >
                         {event.bookingType}
                       </span>
@@ -355,5 +368,4 @@ export default function EventsList() {
     </div>
   )
 }
-
 

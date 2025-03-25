@@ -17,6 +17,10 @@ spring:
   modulith:
     events:
       jdbc-enabled: true
+  servlet:
+    multipart:
+      enabled: true
+
 
 app:
   security:
@@ -24,6 +28,8 @@ app:
       secretKey: ${JWT_SECRET_KEY}
       expirationTime: 3600
       algorithm: HS256
+  cloudinary:
+    url: ${CLOUDINARY_URL}
 
   open-api:
     server:
