@@ -371,7 +371,7 @@ export default function EventDetailsPage() {
                 <Card className="h-full transition-all hover:shadow-md">
                   <div className="aspect-[2/1] bg-muted overflow-hidden">
                     <img
-                      src={`/placeholder.svg?height=200&width=400&text=${encodeURIComponent(event.title)}`}
+                      src={event.imageUrl}
                       alt={event.title}
                       className="w-full h-full object-cover"
                     />
@@ -402,5 +402,6 @@ export default function EventDetailsPage() {
     </div>
   )
 }
+
 
 
