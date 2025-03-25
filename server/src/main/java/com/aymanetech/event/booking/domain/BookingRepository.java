@@ -1,4 +1,6 @@
 package com.aymanetech.event.booking.domain;
 
-public class BookingRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface BookingRepository extends JpaRepository<Booking, BookingId> {
 }
