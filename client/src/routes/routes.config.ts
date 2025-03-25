@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import AdminLayout from "../layout/admin-layout.tsx";
+import { MainLayout } from "../layout/main-layout.tsx";
 
 export interface RouteConfig {
   path: string;
@@ -10,7 +11,6 @@ export interface RouteConfig {
   roles?: string[];
 }
 
-const Home = lazy(() => import("../Home"));
 const Login = lazy(() => import("../pages/auth/Login.page.tsx"));
 const Register = lazy(() => import("../pages/auth/Register.page.tsx"));
 const ChangePassword = lazy(() => import("../pages/auth/ChangePassword.page.tsx"));
@@ -20,6 +20,10 @@ const EventList = lazy(() => import("../pages/admin/event/event-list.tsx"));
 const Profile = lazy(() => import("../pages/profile/profile.page.tsx"))
 const UserList = lazy(() => import("../pages/admin/user/user-list.page.tsx"))
 
+const Home = lazy(() => import("../pages/client/Home.page.tsx"))
+const Events = lazy(() => import("../pages/client/Events.page.tsx"))
+const EventDetails = lazy(() => import("../pages/client/Event-details.page.tsx"))
+
 
 const NotFound = lazy(() => import("../pages/error/NotFound.page.tsx"));
 const Unauthorized = lazy(() => import("../pages/error/Unauthorized.page.tsx"));
@@ -27,11 +31,26 @@ const Unauthorized = lazy(() => import("../pages/error/Unauthorized.page.tsx"));
 export const publicRoutes: RouteConfig[] = [
   {
     path: "",
-    component: Home,
-  },
-  {
-    path: "/home",
-    component: Home,
+    component: MainLayout,
+    children: [
+
+      {
+        path: "",
+        component: Home,
+      },
+      {
+        path: "/events",
+        component: Events,
+      },
+      {
+        path: "/event/detail",
+        component: EventDetails,
+      },
+      {
+        path: "/home",
+        component: Home,
+      },
+    ]
   },
   {
     path: "/login",
@@ -45,6 +64,7 @@ export const publicRoutes: RouteConfig[] = [
     path: "/profile",
     component: Profile,
   },
+
   {
     path: "*",
     component: NotFound,
