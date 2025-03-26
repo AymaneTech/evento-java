@@ -1,18 +1,14 @@
-"use client"
-
-import type React from "react"
-
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { bookingSchema, type BookingFormValues } from "../schemas/booking.schema"
-import { Button } from "./ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
-import { Input } from "./ui/input"
-import { Separator } from "./ui/separator"
-import { formatCurrency } from "../utils/formatters"
-import { Loader2, Minus, Plus } from "lucide-react"
-import type { Event } from "../types/event.types"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type BookingFormValues, bookingSchema } from "../schemas/booking.schema";
+import { Button } from "./ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import { Input } from "./ui/input";
+import { Separator } from "./ui/separator";
+import { formatCurrency } from "../utils/formatters";
+import { Loader2, Minus, Plus } from "lucide-react";
+import type { Event } from "../types/event.types";
 
 interface BookingFormProps {
   event: Event

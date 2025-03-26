@@ -23,7 +23,7 @@ export interface UserResponseDto {
   firstName: string
   lastName: string
   email: string
-  status: UserStatus
+  status?: UserStatus
   role: NestedRole
 }
 

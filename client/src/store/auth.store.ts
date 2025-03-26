@@ -3,19 +3,20 @@ import { persist, createJSONStorage } from "zustand/middleware"
 import { AuthService } from "../services/auth.service"
 import type {
   UserResponseDto,
+  UpdateUserRequestDto,
+} from "../types/user.types"
+import type {
   UserLoginRequestDto,
   RegisterNewUserRequestDto,
   ChangePasswordRequestDto,
-  UpdateUserRequestDto,
 } from "../types/auth.types"
-import { ACCESS_TOKEN_KEY } from "../api/axios"
-import Cookies from "js-cookie"
 import { parseApiError } from "../lib/errors.util"
-import { clearUserData, getRedirectPathByRole } from "../lib/jwt.util"
-
-function getAuthToken() {
-  return Cookies.get(ACCESS_TOKEN_KEY)
-}
+import {
+  clearUserData,
+  storeUserInfoFromToken,
+  getRedirectPathByRole,
+  isAuthenticated
+} from "../lib/jwt.util"
 
 interface AuthState {
   user: UserResponseDto | null
@@ -37,7 +38,7 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
-      isAuthenticated: !!getAuthToken(),
+      isAuthenticated: isAuthenticated(),
       isLoading: false,
       error: null,
       parsedError: null,
@@ -47,13 +48,20 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true, error: null, parsedError: null })
           const response = await AuthService.login(credentials)
 
+          const userData = storeUserInfoFromToken(response.token);
+
           set({
-            user: response.user,
+            user: {
+              id: Number(userData.id),
+              firstName: userData.firstName,
+              lastName: userData.lastName,
+              email: userData.email,
+              role: userData.role,
+            },
             isAuthenticated: true,
             isLoading: false,
           })
 
-          // Return the redirect path based on user role
           return getRedirectPathByRole()
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : "Login failed"
@@ -102,8 +110,16 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null, parsedError: null })
           const updatedUser = await AuthService.updateProfile(data)
+
           set({
-            user: updatedUser,
+            user: {
+              id: updatedUser.id,
+              firstName: updatedUser.firstName,
+              lastName: updatedUser.lastName,
+              email: updatedUser.email,
+              status: updatedUser.status,
+              role: updatedUser.role
+            },
             isLoading: false,
           })
         } catch (error) {
@@ -121,6 +137,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null, parsedError: null })
           await AuthService.deleteAccount()
+          clearUserData()
           set({
             user: null,
             isAuthenticated: false,
@@ -141,8 +158,16 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null, parsedError: null })
           const user = await AuthService.getCurrentUser()
+
           set({
-            user,
+            user: {
+              id: user.id,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              status: user.status,
+              role: user.role
+            },
             isLoading: false,
           })
         } catch (error) {
@@ -174,10 +199,7 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         user: state.user,
-        // Note: We don't store isAuthenticated in sessionStorage as we'll check cookies
       }),
     },
   ),
 )
-
-

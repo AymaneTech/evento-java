@@ -18,13 +18,11 @@ export default function HomePage() {
   const [featuredEvents, setFeaturedEvents] = useState<Event[]>([])
 
   useEffect(() => {
-    console.log("hello use effect ");
     fetchAllEvents()
     fetchAllCategories()
   }, [])
 
   useEffect(() => {
-    console.log("hello ");
     if (events.length > 0) {
       setFeaturedEvents(events.slice(0, 5))
     }

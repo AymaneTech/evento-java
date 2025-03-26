@@ -90,7 +90,6 @@ export default function UsersList() {
   }
 
   const openDeleteDialog = (user: (typeof users)[0]) => {
-    console.log("here is the user ", user)
     setSelectedUser(user)
     setIsDeleteDialogOpen(true)
   }

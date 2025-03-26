@@ -18,14 +18,28 @@ export const AuthService = {
   },
 
   login: async (credentials: UserLoginRequestDto): Promise<AuthenticationResponseDto> => {
-    const response = await apiClient.post<AuthenticationResponseDto>(`${API_PATH}/login`, credentials)
+    try {
+      console.log("AuthService login with:", credentials.email)
+      const response = await apiClient.post<AuthenticationResponseDto>(`${API_PATH}/login`, credentials)
+      console.log("AuthService login response:", response.data)
 
-    if (response.data && response.data.token) {
-      setAuthTokens(response.data.token, response.data.refreshToken)
-      storeUserInfoFromToken(response.data.token)
+      if (response.data && response.data.token) {
+        // Store tokens in cookies
+        setAuthTokens(response.data.token, response.data.refreshToken)
+
+        // Extract and store user info from token
+        storeUserInfoFromToken(response.data.token)
+
+        console.log("Tokens stored, user info extracted")
+      } else {
+        console.error("Missing token in login response")
+      }
+
+      return response.data
+    } catch (error) {
+      console.error("AuthService login error:", error)
+      throw error
     }
-
-    return response.data
   },
 
   changePassword: async (passwordData: ChangePasswordRequestDto): Promise<void> => {

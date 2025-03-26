@@ -30,8 +30,6 @@ export default function EventDetailsPage() {
   const [relatedEvents, setRelatedEvents] = useState<Event[]>([])
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false)
 
-  console.log(selectedEvent);
-
 
   useEffect(() => {
     if (id) {

@@ -44,14 +44,11 @@ export default function EventsPage() {
   }, [searchParams])
 
   useEffect(() => {
-    console.log("here here motherfucker");
-
     fetchAllEvents()
     fetchAllCategories()
   }, [])
 
   useEffect(() => {
-    console.log("lkllelelel");
     let filtered = [...events]
 
     if (selectedCategories.length > 0) {

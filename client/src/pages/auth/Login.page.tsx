@@ -1,7 +1,6 @@
-"use client"
 
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { useAuthStore } from "../../store/auth.store"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
@@ -12,6 +11,7 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../components/ui/form"
+import { debugAuthState } from "../../lib/debug.util"
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -22,8 +22,12 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { login, isLoading, parsedError, clearError } = useAuthStore()
+
+  // Debug auth state on component mount
+  debugAuthState("Login page mount")
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -35,10 +39,23 @@ export default function Login() {
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
+      setErrorMessage(null)
+      clearError()
+
+      console.log("Submitting login form with:", values.email)
       const redirectPath = await login(values)
-      navigate(redirectPath)
+
+      console.log("Login successful, redirecting to:", redirectPath)
+      // Use the from location if available (user was redirected to login)
+      const from = location.state?.from?.pathname || redirectPath
+
+      // Debug auth state before navigation
+      debugAuthState("Before navigation after login")
+
+      // Navigate to the redirect path
+      navigate(from, { replace: true })
     } catch (error) {
-      console.error("Login error:", error)
+      console.error("Login error in component:", error)
       setErrorMessage("Authentication failed. Please check your credentials and try again.")
     }
   }

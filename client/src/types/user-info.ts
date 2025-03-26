@@ -1,26 +1,24 @@
-"use client"
-
-import { useMemo } from "react"
+import { useMemo } from "react";
 import {
   getUserData,
-  getUserFullName,
   getUserEmail,
+  getUserFullName,
   getUserId,
   getUserRole,
   hasRole,
   type UserData,
-} from "../lib/jwt.util"
+} from "../lib/jwt.util";
 
 interface UserInfo {
-  id: string
-  fullName: string
-  email: string
-  role: string
-  isAdmin: boolean
-  isOrganizer: boolean
-  isUser: boolean
-  hasRole: (role: string) => boolean
-  userData: UserData | null
+  id: string;
+  fullName: string;
+  email: string;
+  role: string;
+  isAdmin: boolean;
+  isOrganizer: boolean;
+  isUser: boolean;
+  hasRole: (role: string) => boolean;
+  userData: UserData | null;
 }
 
 /**
@@ -28,11 +26,11 @@ interface UserInfo {
  */
 export function useUserInfo(): UserInfo {
   return useMemo(() => {
-    const userData = getUserData()
-    const id = getUserId()
-    const fullName = getUserFullName()
-    const email = getUserEmail()
-    const role = getUserRole()
+    const userData = getUserData();
+    const id = getUserId();
+    const fullName = getUserFullName();
+    const email = getUserEmail();
+    const role = getUserRole();
 
     return {
       id,
@@ -44,8 +42,8 @@ export function useUserInfo(): UserInfo {
       isUser: hasRole("ROLE_USER") || hasRole("USER"),
       hasRole,
       userData,
-    }
-  }, [])
+    };
+  }, []);
 }
 
 

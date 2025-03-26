@@ -38,7 +38,6 @@ export default function ChangePasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Change password form submitted, default prevented")
 
     if (formData.newPassword !== formData.confirmPassword) {
       setPasswordError("New passwords do not match")

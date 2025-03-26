@@ -7,41 +7,36 @@ import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../../components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../components/ui/form";
 
-const registerSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string(),
-  roleId: z.number().int().positive()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"]
-});
+const registerSchema = z
+  .object({
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+    roleId: z.number().int().positive(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  })
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>
 
 export default function RegisterPage() {
-  const navigate = useNavigate();
-  const { register, isLoading, error, clearError } = useAuthStore();
-  const { roles, fetchAllRoles, isLoading: rolesLoading, error: rolesError } = useRoleStore();
+  const navigate = useNavigate()
+  const { register, isLoading, error, clearError } = useAuthStore()
+  const { roles, fetchAllRoles, isLoading: rolesLoading, error: rolesError } = useRoleStore()
 
   useEffect(() => {
-    fetchAllRoles();
-  }, [fetchAllRoles]);
+    fetchAllRoles()
+  }, [fetchAllRoles])
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -53,7 +48,7 @@ export default function RegisterPage() {
       confirmPassword: "",
       roleId: 2, // Default to user role
     },
-  });
+  })
 
   const onSubmit = async (values: RegisterFormValues) => {
     try {
@@ -63,15 +58,15 @@ export default function RegisterPage() {
         email: values.email,
         password: values.password,
         roleId: values.roleId,
-      });
+      })
 
-      navigate("registeration-success");
+      navigate("/registeration-success")
     } catch (err) {
-      console.error("Registration error:", err);
+      console.error("Registration error:", err)
     }
-  };
+  }
 
-  const errorMessage = error || rolesError || null;
+  const errorMessage = error || rolesError || null
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -85,12 +80,7 @@ export default function RegisterPage() {
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{errorMessage}</AlertDescription>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 ml-auto"
-                onClick={clearError}
-              >
+              <Button variant="ghost" size="sm" className="h-4 w-4 ml-auto" onClick={clearError}>
                 ×
               </Button>
             </Alert>
@@ -135,12 +125,7 @@ export default function RegisterPage() {
                   <FormItem className="space-y-2">
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type="email"
-                        autoComplete="email"
-                        placeholder="name@example.com"
-                      />
+                      <Input {...field} type="email" autoComplete="email" placeholder="name@example.com" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -154,11 +139,7 @@ export default function RegisterPage() {
                   <FormItem className="space-y-2">
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type="password"
-                        autoComplete="new-password"
-                      />
+                      <Input {...field} type="password" autoComplete="new-password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -172,11 +153,7 @@ export default function RegisterPage() {
                   <FormItem className="space-y-2">
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type="password"
-                        autoComplete="new-password"
-                      />
+                      <Input {...field} type="password" autoComplete="new-password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -190,7 +167,7 @@ export default function RegisterPage() {
                   <FormItem className="space-y-2">
                     <FormLabel>Role</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      onValueChange={(value) => field.onChange(Number.parseInt(value))}
                       defaultValue={field.value.toString()}
                       disabled={rolesLoading || roles.length === 0}
                     >
@@ -200,7 +177,7 @@ export default function RegisterPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {roles.map(role => (
+                        {roles.map((role) => (
                           <SelectItem key={role.id} value={role.id.toString()}>
                             {role.label}
                           </SelectItem>
@@ -235,5 +212,7 @@ export default function RegisterPage() {
         </CardFooter>
       </Card>
     </div>
-  );
+  )
 }
+
+
