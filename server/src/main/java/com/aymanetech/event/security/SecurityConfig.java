@@ -37,9 +37,10 @@ public class SecurityConfig {
             "/webjars/**",
             "/api/auth/register",
             "/api/auth/login",
+            "/api/v1/roles",
     };
 
-    private final JwtConfig jwtConfig;
+    private final JwtConfigProperties jwtConfigProperties;
     private final UserRepository userRepository;
 
     @Bean
@@ -62,7 +63,7 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withSecretKey(jwtConfig.getSecretKey()).build();
+        return NimbusJwtDecoder.withSecretKey(jwtConfigProperties.getSecretKey()).build();
     }
 
     @Bean

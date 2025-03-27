@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface BookingRepository extends JpaRepository<Booking, BookingId> {
 
     @Query("SELECT b FROM Booking b WHERE b.user.id = :userId")
@@ -15,6 +17,9 @@ public interface BookingRepository extends JpaRepository<Booking, BookingId> {
 
     @Query("SELECT b FROM Booking b WHERE b.event.id = :eventId")
     Page<Booking> findByEventId(EventId eventId, Pageable pageable);
+
+    @Query("SELECT b FROM Booking b WHERE b.event.id = :eventId")
+    List<Booking> findByEventId(EventId eventId);
 
     long countByEventAndStatus(Event event, BookingStatus status);
 

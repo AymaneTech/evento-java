@@ -87,7 +87,7 @@ export function MainLayout() {
                 <>
                   {(isAdmin || isOrganizer) && (
                     <Button asChild variant="outline" className="hidden md:flex">
-                      <Link to="/admin/dashboard">Dashboard</Link>
+                      <Link to="/dashboard/events">Dashboard</Link>
                     </Button>
                   )}
                   <DropdownMenu>

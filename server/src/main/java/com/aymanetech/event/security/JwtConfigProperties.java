@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import javax.crypto.SecretKey;
 
 @ConfigurationProperties("app.security.jwt")
-public record JwtConfig(
+public record JwtConfigProperties(
         String secretKey,
         long expirationTime,
         String algorithm

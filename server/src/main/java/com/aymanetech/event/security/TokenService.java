@@ -20,12 +20,12 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TokenService {
-    private final JwtConfig jwtConfig;
+    private final JwtConfigProperties jwtConfigProperties;
 
     public String generateToken(Authentication authentication) {
         var header = getHeader();
         var claims = getJwtClaimsSet(authentication);
-        var key = jwtConfig.getSecretKey();
+        var key = jwtConfigProperties.getSecretKey();
         var token = new SignedJWT(header, claims);
 
         try {
@@ -38,7 +38,7 @@ public class TokenService {
     }
 
     private JWSHeader getHeader() {
-        return new JWSHeader.Builder(jwtConfig.getAlgorithm())
+        return new JWSHeader.Builder(jwtConfigProperties.getAlgorithm())
                 .type(JOSEObjectType.JWT)
                 .build();
     }

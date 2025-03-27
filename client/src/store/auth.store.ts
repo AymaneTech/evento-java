@@ -24,6 +24,7 @@ interface AuthState {
   isLoading: boolean
   error: string | null
   parsedError: string | null
+
   login: (credentials: UserLoginRequestDto) => Promise<string>
   register: (userData: RegisterNewUserRequestDto) => Promise<void>
   changePassword: (data: ChangePasswordRequestDto) => Promise<void>

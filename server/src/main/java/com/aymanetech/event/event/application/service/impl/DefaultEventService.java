@@ -83,12 +83,14 @@ public class DefaultEventService implements EventService {
 
     @Override
     public EventResponseDto updateEvent(EventId id, EventRequestDto request) {
+        final var imageUrl = fileUploader.upload(request.image());
         final var event = findEventEntityById(id);
         final var category = categoryService.findCategoryEntityById(CategoryId.of(request.categoryId()));
         final var organizer = organizerService.findOrganizerById(UserId.of(request.userId()));
         mapper.updateEntity(event, request);
         event.setOrganiser(organizer)
                 .setCategory(category)
+                .setImageUrl(imageUrl)
                 .setSlug(slugService.generateUniqueSlug(request.title()));
         return mapper.toResponseDto(event);
     }
