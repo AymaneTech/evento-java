@@ -14,13 +14,20 @@ import com.aymanetech.event.user.application.service.AuthenticationService;
 import com.aymanetech.event.user.application.service.RoleService;
 import com.aymanetech.event.user.domain.entity.User;
 import com.aymanetech.event.user.domain.repository.UserRepository;
+import com.aymanetech.event.user.domain.vo.RoleId;
+import com.aymanetech.event.user.domain.vo.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import static com.aymanetech.event.user.domain.vo.UserStatus.PENDING;
+import java.util.Map;
+
+import static com.aymanetech.event.user.domain.vo.UserStatus.ACTIVE;
 
 @ApplicationService
 @RequiredArgsConstructor
@@ -36,12 +43,14 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     @Override
     public UserResponseDto registerNewUser(RegisterNewUserRequestDto request) {
-        var defaultRole = roleService.findRoleByName(DEFAULT_USER_ROLE);
+        var role = roleService.findRoleEntityById(RoleId.of(request.roleId()));
+        // var status = role.getName().equals(DEFAULT_USER_ROLE) ? ACTIVE : PENDING;
+        var status = ACTIVE; // todo: if user is orgnaizer or admin make request in pending status
 
         var user = mapper.toEntity(request)
                 .setPassword(passwordEncoder.encode(request.password()))
-                .setRole(defaultRole)
-                .setStatus(PENDING);
+                .setRole(role)
+                .setStatus(status);
 
         var savedUser = repository.save(user);
         return mapper.toResponseDto(savedUser);
@@ -57,13 +66,46 @@ public class DefaultAuthenticationService implements AuthenticationService {
 
     @Override
     public void changePassword(ChangePasswordRequestDto request) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        var principal = (User) authentication.getPrincipal();
+        var principal = getCurrentUser();
 
         ensureOldPasswordIsValid(request, principal);
         var newPassword = passwordEncoder.encode(request.newPassword());
         var user = getUser(principal);
         user.setPassword(newPassword);
+    }
+
+    @Override
+    public UserResponseDto getAuthenticatedUser() {
+        var principal = getCurrentUser();
+        return mapper.toResponseDto(principal);
+    }
+
+    private String extractUserIdAsString(Object idClaim) {
+        return switch (idClaim) {
+            case Map<?, ?> mapClaim -> String.valueOf(mapClaim.get("value"));
+            case String stringClaim -> stringClaim;
+            case Number numberClaim -> numberClaim.toString();
+            case null -> throw new IllegalArgumentException("ID claim is null");
+            default -> String.valueOf(idClaim);
+        };
+    }
+
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication instanceof JwtAuthenticationToken jwtAuthentication) {
+            var jwt = (Jwt) jwtAuthentication.getPrincipal();
+
+            Object idClaim = jwt.getClaim("id");
+            String userIdAsString = extractUserIdAsString(idClaim);
+
+            var userId = UserId.of(Integer.valueOf(userIdAsString));
+
+            return repository.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        }
+
+        throw new BusinessValidationException("Not authenticated with JWT");
     }
 
     private User getUser(User principal) {

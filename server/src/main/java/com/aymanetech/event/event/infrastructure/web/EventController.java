@@ -36,7 +36,7 @@ public class EventController {
         return ResponseEntity.ok(event);
     }
 
-    @GetMapping("/{organiserId}")
+    @GetMapping("/organizer/{organiserId}")
     public ResponseEntity<Page<EventResponseDto>> findAllEventsByOrganiserId(@PathVariable Integer organiserId,
                                                                              @RequestParam(defaultValue = "0") int pageNum,
                                                                              @RequestParam(defaultValue = "10") int pageSize) {
@@ -44,7 +44,7 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
-    @GetMapping("/{title}")
+    @GetMapping("/search/{title}")
     public ResponseEntity<Page<EventResponseDto>> searchEventByTitle(@PathVariable String title,
                                                                      @RequestParam(defaultValue = "0") int pageNum,
                                                                      @RequestParam(defaultValue = "10") int pageSize) {
@@ -53,14 +53,14 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<EventResponseDto> createEvent(@RequestBody @Valid EventRequestDto request) {
+    public ResponseEntity<EventResponseDto> createEvent(@ModelAttribute @Valid EventRequestDto request) {
         var event = eventService.createEvent(request);
         return ResponseEntity.created(getUri(BASE_URL, event.id()))
                 .body(event);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EventResponseDto> updateEvent(@PathVariable Long id, @RequestBody @Valid EventRequestDto request) {
+    public ResponseEntity<EventResponseDto> updateEvent(@PathVariable Long id, @ModelAttribute @Valid EventRequestDto request) {
         var event = eventService.updateEvent(EventId.of(id), request);
         return ResponseEntity.ok(event);
     }

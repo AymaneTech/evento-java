@@ -4,6 +4,7 @@ import com.aymanetech.event.user.application.dto.request.PermissionRequestDto;
 import com.aymanetech.event.user.application.dto.response.PermissionResponseDto;
 import com.aymanetech.event.user.application.service.PermissionService;
 import com.aymanetech.event.user.domain.vo.PermissionId;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class PermissionController {
     private final PermissionService permissionService;
 
     @PostMapping
-    public ResponseEntity<PermissionResponseDto> createPermission(@RequestBody PermissionRequestDto dto) {
+    public ResponseEntity<PermissionResponseDto> createPermission(@RequestBody @Valid PermissionRequestDto dto) {
         PermissionResponseDto permission = permissionService.createNewPermission(dto);
         return ResponseEntity.created(getUri(BASE_URL, permission.id()))
                 .body(permission);
@@ -39,7 +40,7 @@ public class PermissionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PermissionResponseDto> updatePermission(@PathVariable Long id, @RequestBody PermissionRequestDto dto) {
+    public ResponseEntity<PermissionResponseDto> updatePermission(@PathVariable Long id, @RequestBody @Valid PermissionRequestDto dto) {
         PermissionResponseDto permission = permissionService.updatePermission(PermissionId.of(id), dto);
         return ResponseEntity.ok(permission);
     }

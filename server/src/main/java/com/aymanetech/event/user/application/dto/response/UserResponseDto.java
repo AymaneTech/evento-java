@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 /**
  * Response DTO for {@link com.aymanetech.event.user.domain.entity.User}
  */
-public record UserResponseDto(@NotNull Long id,
+public record UserResponseDto(@NotNull Integer id,
                               @NotBlank String firstName,
                               @NotBlank String lastName,
                               @NotBlank String email,

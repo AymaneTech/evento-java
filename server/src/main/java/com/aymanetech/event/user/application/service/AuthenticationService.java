@@ -13,4 +13,6 @@ public interface AuthenticationService {
     AuthenticationResponseDto login(UserLoginRequestDto request);
 
     void changePassword(ChangePasswordRequestDto request);
+
+    UserResponseDto getAuthenticatedUser();
 }

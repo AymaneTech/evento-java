@@ -35,10 +35,12 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-resources/**",
             "/webjars/**",
-            "/api/auth/**",
+            "/api/auth/register",
+            "/api/auth/login",
+            "/api/v1/roles",
     };
 
-    private final JwtConfig jwtConfig;
+    private final JwtConfigProperties jwtConfigProperties;
     private final UserRepository userRepository;
 
     @Bean
@@ -48,7 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(WHITE_LIST).permitAll()
                         .requestMatchers("api/v1/users").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(configurer -> configurer.jwt(withDefaults()))
@@ -61,7 +63,7 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withSecretKey(jwtConfig.getSecretKey()).build();
+        return NimbusJwtDecoder.withSecretKey(jwtConfigProperties.getSecretKey()).build();
     }
 
     @Bean
@@ -93,6 +95,7 @@ public class SecurityConfig {
     AccessDeniedHandler accessDeniedHandler() {
         return new CustomAccessDeniedHandler();
     }
+
     @Bean
     AuthenticationEntryPoint authenticationEntryPoint() {
         return new CustomAuthenticationEntryPoint();

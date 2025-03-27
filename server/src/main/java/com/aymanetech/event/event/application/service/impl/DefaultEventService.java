@@ -8,6 +8,7 @@ import com.aymanetech.event.event.application.dto.response.EventResponseDto;
 import com.aymanetech.event.event.application.mapper.EventMapper;
 import com.aymanetech.event.event.application.service.CategoryService;
 import com.aymanetech.event.event.application.service.EventService;
+import com.aymanetech.event.event.application.service.FileUploader;
 import com.aymanetech.event.event.domain.entity.Event;
 import com.aymanetech.event.event.domain.repository.EventRepository;
 import com.aymanetech.event.event.domain.vo.BookingType;
@@ -15,7 +16,6 @@ import com.aymanetech.event.event.domain.vo.CategoryId;
 import com.aymanetech.event.event.domain.vo.EventId;
 import com.aymanetech.event.user.application.service.OrganizerService;
 import com.aymanetech.event.user.domain.vo.UserId;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -26,13 +26,15 @@ public class DefaultEventService implements EventService {
     private final CategoryService categoryService;
     private final OrganizerService organizerService;
     private final SlugService slugService;
+    private final FileUploader fileUploader;
 
-    public DefaultEventService(EventRepository repository, EventMapper mapper, CategoryService categoryService, OrganizerService organizerService, SlugService slugService) {
+    public DefaultEventService(EventRepository repository, EventMapper mapper, CategoryService categoryService, OrganizerService organizerService, SlugService slugService, FileUploader fileUploader) {
         this.repository = repository;
         this.mapper = mapper;
         this.categoryService = categoryService;
         this.organizerService = organizerService;
         this.slugService = slugService;
+        this.fileUploader = fileUploader;
         this.slugService.setRepository(repository);
     }
 
@@ -65,24 +67,30 @@ public class DefaultEventService implements EventService {
 
     @Override
     public EventResponseDto createEvent(EventRequestDto request) {
+        final var imageUrl = fileUploader.upload(request.image());
         final var event = mapper.toEntity(request);
         final var category = categoryService.findCategoryEntityById(CategoryId.of(request.categoryId()));
         final var organizer = organizerService.findOrganizerById(UserId.of(request.userId()));
+
         event.setOrganiser(organizer)
                 .setCategory(category)
+                .setImageUrl(imageUrl)
                 .setSlug(slugService.generateUniqueSlug(request.title()));
+
         final var savedEvent = repository.save(event);
         return mapper.toResponseDto(savedEvent);
     }
 
     @Override
     public EventResponseDto updateEvent(EventId id, EventRequestDto request) {
+        final var imageUrl = fileUploader.upload(request.image());
         final var event = findEventEntityById(id);
         final var category = categoryService.findCategoryEntityById(CategoryId.of(request.categoryId()));
         final var organizer = organizerService.findOrganizerById(UserId.of(request.userId()));
         mapper.updateEntity(event, request);
         event.setOrganiser(organizer)
                 .setCategory(category)
+                .setImageUrl(imageUrl)
                 .setSlug(slugService.generateUniqueSlug(request.title()));
         return mapper.toResponseDto(event);
     }
@@ -106,7 +114,8 @@ public class DefaultEventService implements EventService {
         event.setIsVerified(!event.getIsVerified());
     }
 
-    private Event findEventEntityById(EventId id) {
+    @Override
+    public Event findEventEntityById(EventId id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event", id.value()));
     }
